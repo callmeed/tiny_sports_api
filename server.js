@@ -4,6 +4,12 @@ const axios = require('axios');
 const port = 3000;
 
 const NBA_API_URL = 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard'
+const CACHE_DURATION = 5 * 60 * 1000; // 15 minutes in milliseconds
+
+let cache = {
+  data: null,
+  lastFetch: 0
+};
 
 app.get('/', (req, res) => {
   res.json({ message: 'Hello World!' });
@@ -11,8 +17,20 @@ app.get('/', (req, res) => {
 
 app.get('/nba', async (req, res) => {
   try {
+    const currentTime = Date.now();
+    const isCacheValid = (currentTime - cache.lastFetch) < CACHE_DURATION;
+    if (isCacheValid && cache.data) {
+      res.setHeader('X-Cache-Hit', 'true');
+      return res.json(cache.data); // Return cached data if valid
+    }
     const apiResponse = await axios.get(NBA_API_URL);
     const modifiedData = transformNbaData(apiResponse.data);
+    // Update cache
+    cache = {
+      data: modifiedData,
+      lastFetch: Date.now()
+    };
+    res.setHeader('X-Cache-Hit', 'false');
     res.json(modifiedData);
   } catch (error) {
     console.error("Error occurred in /nba endpoint:", error.message);
@@ -26,7 +44,7 @@ const transformNbaData = (data) => {
   // For example:
   const result = [];
   data['events'].forEach(event => {
-    const name = event.shortName;
+    const game = event.shortName;
     const gameTime = event.status.type.shortDetail.split(" - ");
     const gameMsg = gameTime.length > 1 ? gameTime[1] : gameTime[0];
     const team1 = event.competitions[0].competitors[0].team.abbreviation;
@@ -45,7 +63,7 @@ const transformNbaData = (data) => {
     }
   
     result.push({
-      name,
+      game,
       time: gameMsg,
       teams: [
         { name: team1, score: score1 },
