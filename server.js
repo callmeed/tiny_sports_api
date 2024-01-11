@@ -26,7 +26,7 @@ const transformNbaData = (data) => {
   // For example:
   const result = [];
   data['events'].forEach(event => {
-    const shortName = event.shortName;
+    const name = event.shortName;
     const gameTime = event.status.type.shortDetail.split(" - ");
     const gameMsg = gameTime.length > 1 ? gameTime[1] : gameTime[0];
     const team1 = event.competitions[0].competitors[0].team.abbreviation;
@@ -45,13 +45,13 @@ const transformNbaData = (data) => {
     }
   
     result.push({
-      shortName,
-      gameMsg,
+      name,
+      time: gameMsg,
       teams: [
-        { abbreviation: team1, score: score1 },
-        { abbreviation: team2, score: score2 }
+        { name: team1, score: score1 },
+        { name: team2, score: score2 }
       ],
-      info
+      status: info
     });
 
   });
