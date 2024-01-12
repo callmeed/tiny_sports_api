@@ -4,7 +4,7 @@ const axios = require('axios');
 const port = 3000;
 
 const NBA_API_URL = 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard'
-const CACHE_DURATION = 5 * 60 * 1000; // 15 minutes in milliseconds
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 let cache = {
   data: null,
@@ -46,7 +46,7 @@ const transformNbaData = (data) => {
   data['events'].forEach(event => {
     const game = event.shortName;
     const gameTime = event.status.type.shortDetail.split(" - ");
-    const gameMsg = gameTime.length > 1 ? gameTime[1] : gameTime[0];
+    const gameMsg = gameTime.length > 1 ? gameTime[1].replace(' PM', 'PM') : gameTime[0];
     const team1 = event.competitions[0].competitors[0].team.abbreviation;
     const team2 = event.competitions[0].competitors[1].team.abbreviation;
     const score1 = event.competitions[0].competitors[0].score;
