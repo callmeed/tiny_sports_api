@@ -8,8 +8,14 @@ const NFL_API_URL = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/
 const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
 
 let cache = {
-  data: null,
-  lastFetch: 0
+  nfl: {
+    data: null,
+    lastFetch: 0
+  },
+  nba: {
+    data: null,
+    lastFetch: 0
+  }
 };
 
 app.get('/', (req, res) => {
@@ -19,15 +25,15 @@ app.get('/', (req, res) => {
 app.get ('/nfl', async (req, res) => {
   try {
     const currentTime = Date.now();
-    const isCacheValid = (currentTime - cache.lastFetch) < CACHE_DURATION;
-    if (isCacheValid && cache.data) {
+    const isCacheValid = (currentTime - cache.nfl.lastFetch) < CACHE_DURATION;
+    if (isCacheValid && cache.nfl.data) {
       res.setHeader('X-Cache-Hit', 'true');
       return res.json(cache.data); // Return cached data if valid
     }
     const apiResponse = await axios.get(NFL_API_URL);
-    const modifiedData = transformNflData(apiResponse.data);
+    const modifiedData = transformData(apiResponse.data);
     // Update cache
-    cache = {
+    cache.nfl = {
       data: modifiedData,
       lastFetch: Date.now()
     };
@@ -43,15 +49,15 @@ app.get ('/nfl', async (req, res) => {
 app.get('/nba', async (req, res) => {
   try {
     const currentTime = Date.now();
-    const isCacheValid = (currentTime - cache.lastFetch) < CACHE_DURATION;
-    if (isCacheValid && cache.data) {
+    const isCacheValid = (currentTime - cache.nba.lastFetch) < CACHE_DURATION;
+    if (isCacheValid && cache.nba.data) {
       res.setHeader('X-Cache-Hit', 'true');
       return res.json(cache.data); // Return cached data if valid
     }
     const apiResponse = await axios.get(NBA_API_URL);
-    const modifiedData = transformNflData(apiResponse.data);
+    const modifiedData = transformData(apiResponse.data);
     // Update cache
-    cache = {
+    cache.nba = {
       data: modifiedData,
       lastFetch: Date.now()
     };
@@ -63,6 +69,10 @@ app.get('/nba', async (req, res) => {
     res.status(500).json({ message: 'Error fetching data', error: error.message });
   }
 });
+
+const transformData = (data) => {
+  return transformNflData(data);
+}
 
 const transformNbaData = (data) => {
   // Your complex data manipulation logic goes here
