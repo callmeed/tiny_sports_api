@@ -28,7 +28,7 @@ app.get ('/nfl', async (req, res) => {
     const isCacheValid = (currentTime - cache.nfl.lastFetch) < CACHE_DURATION;
     if (isCacheValid && cache.nfl.data) {
       res.setHeader('X-Cache-Hit', 'true');
-      return res.json(cache.data); // Return cached data if valid
+      return res.json(cache.nfl.data); // Return cached data if valid
     }
     const apiResponse = await axios.get(NFL_API_URL);
     const modifiedData = transformData(apiResponse.data);
@@ -52,7 +52,7 @@ app.get('/nba', async (req, res) => {
     const isCacheValid = (currentTime - cache.nba.lastFetch) < CACHE_DURATION;
     if (isCacheValid && cache.nba.data) {
       res.setHeader('X-Cache-Hit', 'true');
-      return res.json(cache.data); // Return cached data if valid
+      return res.json(cache.nba.data); // Return cached data if valid
     }
     const apiResponse = await axios.get(NBA_API_URL);
     const modifiedData = transformData(apiResponse.data);
