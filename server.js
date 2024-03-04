@@ -6,7 +6,7 @@ const port = 3000;
 
 const NBA_API_URL = 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard'
 const NFL_API_URL = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard'
-const CACHE_DURATION = 5; // 5 minutes in milliseconds
+const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes
 
 let cache = {
   nfl: {
