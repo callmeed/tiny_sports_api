@@ -1,11 +1,12 @@
 const express = require('express');
 const app = express();
 const axios = require('axios');
+const date = require('date-and-time');
 const port = 3000;
 
 const NBA_API_URL = 'https://site.api.espn.com/apis/site/v2/sports/basketball/nba/scoreboard'
 const NFL_API_URL = 'https://site.api.espn.com/apis/site/v2/sports/football/nfl/scoreboard'
-const CACHE_DURATION = 5 * 60 * 1000; // 5 minutes in milliseconds
+const CACHE_DURATION = 5; // 5 minutes in milliseconds
 
 let cache = {
   nfl: {
@@ -19,7 +20,17 @@ let cache = {
 };
 
 app.get('/', (req, res) => {
-  res.json({ message: 'Hello World!' });
+  payload = {
+    profile: {
+      name: 'Your Name',
+      email: 'email@example.com'
+    },
+    messages: [
+      'Message 1',
+      'Message 2'
+    ]
+  }
+  res.json(payload);
 });
 
 app.get ('/nfl', async (req, res) => {
@@ -54,8 +65,20 @@ app.get('/nba', async (req, res) => {
       res.setHeader('X-Cache-Hit', 'true');
       return res.json(cache.nba.data); // Return cached data if valid
     }
+    // Today 
     const apiResponse = await axios.get(NBA_API_URL);
     const modifiedData = transformData(apiResponse.data);
+    // Yesterday 
+    today = new Date();
+    yesterday = yesterday = date.addDays(today, -1);
+    // ESPN wants format of YYYYMMDD
+    yesterday_param = date.format(yesterday, 'YYYYMMDD');
+    const apiResponseYesterday = await axios.get(NBA_API_URL + '?dates=' + yesterday_param);
+    const modifiedDataYesterday = transformData(apiResponseYesterday.data);
+    // Loop through yesterday and append to modifiedData
+    modifiedDataYesterday.forEach(game => {
+      modifiedData.push(game);
+    });
     // Update cache
     cache.nba = {
       data: modifiedData,
