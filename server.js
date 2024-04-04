@@ -193,7 +193,8 @@ const transformMlbData = (data) => {
         { name: team1, score: score1 },
         { name: team2, score: score2 }
       ],
-      status: info
+      status: info,
+      status_short: info
     });
 
   });
